@@ -16,13 +16,12 @@ public class ServidorImpl extends UnicastRemoteObject implements Servidor {
     @Override
     public String consultar(int id) throws RemoteException {
 
-        // Traemos TODA la tabla, ignorando el parámetro "id" por ahora
         String query = "SELECT * FROM empleados";
         StringBuilder datos = new StringBuilder();
 
         try (Connection con = Conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) { // Ejecutamos directo porque no hay '?'
+             ResultSet rs = ps.executeQuery()) {
 
             ResultSetMetaData metaData = rs.getMetaData();
             int columnas = metaData.getColumnCount();
@@ -31,7 +30,6 @@ public class ServidorImpl extends UnicastRemoteObject implements Servidor {
             while (rs.next()) {
                 datos.append("Empleado #").append(contador).append("\n");
 
-                // Este ciclo es el que te revelará los nombres de las columnas
                 for (int i = 1; i <= columnas; i++) {
                     datos.append(metaData.getColumnName(i))
                             .append(": ")
