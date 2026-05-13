@@ -1,17 +1,17 @@
 package test;
 
 import clases.ServidorImpl;
+import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class TestServidor {
     public static void main(String[] args) {
         try {
+            LocateRegistry.createRegistry(1099);
+
             ServidorImpl servidor = new ServidorImpl();
 
-            Registry registry = LocateRegistry.createRegistry(1099);
-
-            registry.rebind("ServidorRMI", servidor);
+            Naming.rebind("Datos", servidor);
 
             System.out.println("Servidor RMI listo y esperando conexiones.");
         } catch (Exception e) {
