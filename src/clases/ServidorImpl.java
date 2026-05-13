@@ -2,25 +2,12 @@ package clases;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ServidorImpl extends UnicastRemoteObject implements Servidor {
-
-    private static ArrayList<Persona> listPersonas(){
-        ArrayList<Persona> lista = new ArrayList<Persona>();
-        lista.add(new Persona(1, "Edwin Sarango", "edwin@gmail.com","administrador", 1000.00));
-        lista.add(new Persona(2, "Maria Perez", "maria@gmail.com","empleado", 2000.00));
-        lista.add(new Persona(3, "Juan Gomez", "juan@gmail.com","tecnico", 3000.00));
-        return lista;
-    }
-    private static String getPersona(int id){
-        Persona p = listPersonas().get(id - 1);
-        return p.getNombre() + "\n"
-                + "Correo: " + p.getCorreo() + "\n"
-                + "Cargo: " + p.getCargo() + "\n"
-                + "Sueldo: " + p.getSueldo();
-    }
-
 
     public ServidorImpl() throws RemoteException {
         super();
@@ -28,11 +15,24 @@ public class ServidorImpl extends UnicastRemoteObject implements Servidor {
 
     @Override
     public String consultar(int id) throws RemoteException {
-        ArrayList<Persona> personas = listPersonas();
-        if (id > 0 && id <= personas.size()) {
-            return getPersona(id);
-        } else {
-            return "No se encontro la persona con el id: " + id;
+        String query = "SELECT * FROM usuarios WHERE id = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    //Cambiar luego
+                    return "Nombre: " + rs.getString("nombre") + "\n"
+                            + "Correo: " + rs.getString("correo") + "\n"
+                            + "Cargo: " + rs.getString("cargo") + "\n"
+                            + "Sueldo: " + rs.getDouble("sueldo");
+                } else {
+                    return "No se encontró el usuario con el id: " + id;
+                }
+            }
+        } catch (SQLException e) {
+            return "Error al consultar la base de datos: " + e.getMessage();
         }
     }
 }
